@@ -49,10 +49,11 @@
           >
             <template #header>
               <div class="flex justify-between">
-                <h3 class="text-lg font-semibold">{{ drink.strDrink }}</h3>
+                <h3 class="text-md font-semibold">{{ drink.strDrink }}</h3>
                 <BaseStar
-                  :filled="isItemFavorite(drink.strDrink)"
-                  @click="setItemFavorite"
+                  class="ml-2"
+                  :filled="isDrinkFavorite(drink.idDrink)"
+                  @click="setItemFavorite(drink.idDrink)"
                 />
               </div>
             </template>
@@ -70,6 +71,7 @@
 <script lang="ts" setup>
 import { Drink } from "models";
 
+const STORAGE_FAVORITE_KEY = "COCKTAIL_FAVORITE";
 const selectedCategory = ref("");
 const drinks = ref<Drink[]>([]);
 const isLoadingDrinks = ref(false);
@@ -80,25 +82,44 @@ const { data: cocktails, error: cocktailErrorMessage } =
   await useFetchCategories();
 
 const handleDrinkSearch = async () => {
-  resetDrinksData()
-  const { data, error } = await useFetchDrinksByCategory(selectedCategory.value);
+  resetDrinksData();
 
   isLoadingDrinks.value = true;
+  const { data, error } = await useFetchDrinksByCategory(
+    selectedCategory.value
+  );
+
   drinks.value = data.value || [];
-  drinkErrorMessage.value = error.value?.data || ''
+  drinkErrorMessage.value = error.value?.data || "";
   isLoadingDrinks.value = false;
 };
 
-const isItemFavorite = (name: string): boolean => {
-  return name === "123";
+const { set, get } = useStorage();
+const favoriteDrinks = ref<string[]>([]);
+
+onMounted(() => {
+  initFavoriteDrinks();
+});
+
+const isDrinkFavorite = (idDrink: string): boolean => {
+  return favoriteDrinks.value.includes(idDrink);
 };
 
-const setItemFavorite = () => {
-  console.log("definir local storage");
+const setItemFavorite = (idDrink: string) => {
+  const drinkFavoriteIdx = favoriteDrinks.value.indexOf(idDrink);
+
+  drinkFavoriteIdx > -1
+    ? favoriteDrinks.value.splice(drinkFavoriteIdx, 1)
+    : favoriteDrinks.value.push(idDrink);
+  set(STORAGE_FAVORITE_KEY, favoriteDrinks.value);
 };
 
 const resetDrinksData = () => {
-  drinks.value = []
-  drinkErrorMessage.value = ''
-}
+  drinks.value = [];
+  drinkErrorMessage.value = "";
+};
+
+const initFavoriteDrinks = () => {
+  favoriteDrinks.value = (get(STORAGE_FAVORITE_KEY) as string[]) ?? [];
+};
 </script>
