@@ -1,5 +1,5 @@
 <template>
-  <div class="base-card border rounded border-gray-300" v-bind="$attrs">
+  <div class="base-card border rounded border-gray-300 h-fit" v-bind="$attrs">
     <div v-if="!hideHeader" class="base-card__header p-4 border-b border-gray-300" :class="headerClass">
       <template v-if="!$slots.header">
         <h3 class="text-lg font-semibold" :class="titleClass">{{ title }}</h3>
