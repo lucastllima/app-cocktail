@@ -1,14 +1,17 @@
 <template>
   <transition name="modal-fade">
     <div
-      v-show="modalOpen"
+      v-if="modalOpen"
       tabindex="-1"
       aria-hidden="true"
-      class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto inset-0 h-full max-h-full bg-black bg-opacity-50"
+      class="base-modal fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto inset-0 h-full max-h-full bg-black bg-opacity-50"
+      :class="{ 'base-modal__active': !!modalOpen }"
       @click="$emit('on:close')"
     >
-      <div class="relative w-full max-w-md max-h-full m-auto mt-[10%] -mb-[10%]" @click.stop>
-        <!-- Modal content -->
+      <div
+        class="relative w-full max-w-md max-h-full m-auto mt-[10%] -mb-[10%]"
+        @click.stop
+      >
         <div class="relative bg-white rounded-lg shadow">
           <div
             v-if="!hideHeader"
@@ -20,7 +23,7 @@
             >
             <button
               type="button"
-              class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-400 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-300 dark:hover:text-white"
+              class="modal__close-button text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-400 rounded-lg text-sm w-8 h-8 ml-auto inline-flex justify-center items-center dark:hover:bg-gray-300 dark:hover:text-white"
               @click="$emit('on:close')"
             >
               <svg
@@ -46,7 +49,7 @@
           </div>
           <div
             v-if="!hideFooter"
-            class="flex justify-end items-center p-6 space-x-2 border-t border-gray-300 rounded-b"
+            class="modal__close-button flex justify-end items-center p-6 space-x-2 border-t border-gray-300 rounded-b"
             :class="footerClass"
           >
             <BaseButton @click="$emit('on:close')"> Fechar </BaseButton>
