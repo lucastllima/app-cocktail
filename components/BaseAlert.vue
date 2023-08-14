@@ -4,7 +4,7 @@
     role="alert"
   >
     <strong class="font-bold">{{ title }}</strong>
-    <template v-if="!$slots.header">
+    <template v-if="!$slots.content">
       <span class="block">{{ message }}</span>
     </template>
     <slot v-else name="content"></slot>
