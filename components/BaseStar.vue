@@ -1,8 +1,8 @@
 <template>
   <div class="base-star" v-bind="$attrs">
     <svg
-      class="w-4 h-4 text-gray-300 cursor-pointer"
-      :class="{ '!text-yellow-300': filled }"
+      class="w-4 h-4 cursor-pointer"
+      :class="filled ? 'text-yellow-300' : 'text-gray-300'"
       aria-hidden="true"
       xmlns="http://www.w3.org/2000/svg"
       fill="currentColor"
