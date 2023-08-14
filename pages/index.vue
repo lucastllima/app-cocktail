@@ -2,11 +2,7 @@
   <section class="container mx-auto px-4 md:px-14 my-14">
     <h1 class="text-3xl mb-4">Drink Discover</h1>
 
-    <BaseAlert
-      v-if="drinkErrorMessage || cocktailErrorMessage"
-      class="mb-4"
-      message="Houve uma falha ao tentar realizar a requisição"
-    />
+    <BaseAlert v-if="!errorMessage" class="mb-4" :message="errorMessage" />
 
     <BaseCard hide-footer>
       <template #header>
@@ -45,7 +41,7 @@
             v-for="(drink, idx) in drinks"
             :key="`Drink__${idx}`"
             :title="drink.strDrink"
-            content-class="p-0"
+            content-class="!p-0"
           >
             <template #header>
               <div class="flex justify-between">
@@ -59,12 +55,26 @@
             </template>
             <img :src="drink.strDrinkThumb" />
             <template #footer>
-              <BaseButton class="w-full">Detalhes</BaseButton>
+              <BaseButton class="w-full" @click="handleDrinkDetails(drink)"
+                >Detalhes</BaseButton
+              >
             </template>
           </BaseCard>
         </div>
       </template>
     </BaseCard>
+
+    <BaseModal
+      :modalOpen="!!selectedDrink.idDrink"
+      @on:close="handleCloseModal"
+      :title="selectedDrink.strDrink"
+      content-class="p-0"
+    >
+      <img :src="selectedDrink.strDrinkThumb" />
+      <div class="p-4">
+        {{ getDrinkInstruction }}
+      </div>
+    </BaseModal>
   </section>
 </template>
 
@@ -72,11 +82,22 @@
 import { Drink } from "models";
 
 const STORAGE_FAVORITE_KEY = "COCKTAIL_FAVORITE";
+const DEFAULT_DRINK = {
+  strDrink: "",
+  strDrinkThumb: "",
+  idDrink: "",
+  strInstructions: "",
+};
 const selectedCategory = ref("");
 const drinks = ref<Drink[]>([]);
+const selectedDrink = ref<Drink>(DEFAULT_DRINK);
 const isLoadingDrinks = ref(false);
+const isLoadingDrinkDetails = ref(false);
 const drinkErrorMessage = ref("");
-const { useFetchCategories, useFetchDrinksByCategory } = await useCocktailApi();
+const drinkDetailsErrorMessage = ref("");
+
+const { useFetchCategories, useFetchDrinksByCategory, useFetchDrinkDetails } =
+  await useCocktailApi();
 
 const { data: cocktails, error: cocktailErrorMessage } =
   await useFetchCategories();
@@ -93,6 +114,34 @@ const handleDrinkSearch = async () => {
   drinkErrorMessage.value = error.value?.data || "";
   isLoadingDrinks.value = false;
 };
+
+const handleDrinkDetails = async (drink: Drink) => {
+  selectedDrink.value = drink;
+  isLoadingDrinkDetails.value = true;
+  const { data, error } = await useFetchDrinkDetails(
+    selectedDrink.value.idDrink
+  );
+  // Api Returns the item inside drinks array
+  const strInstructions = data.value ? data.value[0].strInstructions : "";
+
+  selectedDrink.value.strInstructions = strInstructions;
+  drinkErrorMessage.value = error.value?.data || "";
+  isLoadingDrinkDetails.value = false;
+};
+
+const errorMessage = computed(() => {
+  return (
+    cocktailErrorMessage.value ||
+    drinkErrorMessage.value ||
+    drinkDetailsErrorMessage
+  );
+});
+
+const getDrinkInstruction = computed(() => {
+  return isLoadingDrinkDetails.value
+    ? "Carregando..."
+    : selectedDrink.value.strInstructions || "Instrução não inserida.";
+});
 
 const { set, get } = useStorage();
 const favoriteDrinks = ref<string[]>([]);
@@ -121,5 +170,9 @@ const resetDrinksData = () => {
 
 const initFavoriteDrinks = () => {
   favoriteDrinks.value = (get(STORAGE_FAVORITE_KEY) as string[]) ?? [];
+};
+
+const handleCloseModal = () => {
+  selectedDrink.value = DEFAULT_DRINK;
 };
 </script>

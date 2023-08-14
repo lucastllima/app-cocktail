@@ -1,4 +1,4 @@
-import { Category, Drink } from "models";
+import { Category, Drink, DrinkComplement } from "models";
 
 export const useCocktailApi = () => {
     
@@ -11,9 +11,14 @@ export const useCocktailApi = () => {
             `filter.php?c=${category}`,
         );
     }
+    
+    const useFetchDrinkDetails = async (drink: string) => {
+        return await useCustomFetch<DrinkComplement[]>(`/lookup.php?i=${drink}`)
+    }
 
     return {
         useFetchCategories,
-        useFetchDrinksByCategory
+        useFetchDrinksByCategory,
+        useFetchDrinkDetails
     }
 }
